@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Proositeschema = new mongoose.Schema({
-  premium: Boolean,
+  premium: { type: Boolean, default: false },
   lotties: String,
 });
 

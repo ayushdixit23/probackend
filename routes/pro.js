@@ -23,6 +23,7 @@ const s3 = new S3Client({
 router.post("/prodata", upload.single("file"), async (req, res) => {
   try {
     // const { id } = req.body;
+    const { premium, name } = req.body
     const pro = await Pro.findOne();
     // //console.log(user, id);
 
@@ -41,7 +42,7 @@ router.post("/prodata", upload.single("file"), async (req, res) => {
     // });
     // const pro = new Pro({ bgimg: [objectName] });
     // await pro.save();
-    pro.bgimg.push(objectName);
+    pro.bgimg.push({ link: objectName, premium, name });
     await pro.save();
     // await Pro.updateOne({ $push: { bgimg: objectName } });
     const link = process.env.PICURL + objectName;
@@ -56,6 +57,43 @@ router.post("/prodata", upload.single("file"), async (req, res) => {
     });
   }
 });
+
+router.post("/imageupload", upload.single("file"), async (req, res) => {
+  try {
+    // const { id } = req.body;
+    const pro = await Pro.findOne();
+    const { premium, name } = req.body
+    // //console.log(user, id);
+
+    const uuidString = uuid();
+    const objectName = `${Date.now()}${uuidString}${req.file.originalname}`;
+    const result = await s3.send(
+      new PutObjectCommand({
+        Bucket: WORKSPACE_BUCKET,
+        Key: objectName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      })
+    );
+
+    // const pro = new Pro({ img: [{ link: objectName, premium: false }] });
+    // await pro.save();
+    pro.img.push({ link: objectName, premium, name });
+    await pro.save();
+    // await Pro.updateOne({ $push: { bgimg: objectName } });
+    const link = process.env.PICURL + objectName;
+    res.status(200).json({ success: true, link: link });
+    // } else {
+    //   res.status(404).json({ message: "Data not found", success: false });
+    // }
+  } catch (e) {
+    res.status(409).json({
+      message: e.message,
+      success: false,
+    });
+  }
+})
+
 router.post("/proodata", async (req, res) => {
   try {
     const { lotties, premium } = req.body;
@@ -79,31 +117,41 @@ router.get("/getdata", async (req, res) => {
     if (!prodata) {
       res.status(404).json({ message: "Data not found", success: false });
     } else {
-      const urls = [];
-      
-      // let isreviewed = false;
-      // if (product.reviewed.includes(user?._id)) {
-      //   isreviewed = true;
-      // }
-      console.log(prodata);
+      const bgimg = [];
+      const img = [];
+
       for (let i = 0; i < prodata.bgimg.length; i++) {
         if (prodata.bgimg[i] !== null) {
-          const a = process.env.PICURL + prodata.bgimg[i];
-          // const a = await generatePresignedUrl(
-          //   "products",
-          //   product.images[i].content.toString(),
-          //   60 * 60
-          // );
-          urls.push(a);
+          const b = process.env.PICURL + prodata.bgimg[i].link;
+          const data = {
+            link: b,
+            premium: prodata.bgimg[i].premium,
+            name: prodata.bgimg[i].name
+          }
+          bgimg.push(data);
         }
       }
-      res.status(200).json({ urls, success: true });
+
+      for (let i = 0; i < prodata.img.length; i++) {
+        if (prodata.bgimg[i] !== null) {
+          const b = process.env.PICURL + prodata.img[i].link;
+          const data = {
+            link: b,
+            name: prodata.img[i].name,
+            premium: prodata.img[i].premium
+          }
+          img.push(data);
+        }
+      }
+      res.status(200).json({ bgimg, img, success: true });
     }
   } catch (e) {
     console.log(e);
     res.status(400).json({ message: e.message, success: false });
   }
 });
+
+
 router.get("/getproodata", async (req, res) => {
   try {
     const data = await Proo.find();
@@ -115,11 +163,12 @@ router.get("/getproodata", async (req, res) => {
 });
 router.post("/setstyles", async (req, res) => {
   try {
-    const { buttoncolor, color, backgroundColor } = req.body;
+    const { buttoncolor, color, backgroundColor, color1, color2 } = req.body;
     const Styles = new Stylesc({
       buttoncolor: buttoncolor,
       color: color,
       backgroundColor: backgroundColor,
+      color1, color2
     });
     await Styles.save();
 
@@ -149,8 +198,6 @@ router.post("/setbuttons", async (req, res) => {
       borderRadiusLeft,
       boxShadow,
       fontBold,
-      borderColor,
-      borderStyle,
     } = req.body;
     const Buttons = new Buttonss({
       padding: padding,
@@ -168,8 +215,6 @@ router.post("/setbuttons", async (req, res) => {
       borderRadiusLeft: borderRadiusLeft,
       boxShadow: boxShadow,
       fontBold: fontBold,
-      borderColor: borderColor,
-      borderStyle: borderStyle,
     });
     await Buttons.save();
 
@@ -183,8 +228,10 @@ router.post("/setbuttons", async (req, res) => {
 });
 router.post("/setfonts", async (req, res) => {
   try {
-    const { link, name } = req.body;
-    const Fonts = new Fontsss({ link: link, name: name });
+    const { link, name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign
+
+    } = req.body;
+    const Fonts = new Fontsss({ link: link, name: name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign });
     //console.log(user, id);
 
     //  await pross.updateOne({ _id: id });

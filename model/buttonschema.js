@@ -15,8 +15,7 @@ const Buttonss = new mongoose.Schema({
   borderRadiusLeft: { type: String },
   boxShadow: { type: String },
   fontBold: { type: String },
-  borderColor: { type: String },
-  borderStyle: { type: String },
+  premium: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Buttonss", Buttonss);
