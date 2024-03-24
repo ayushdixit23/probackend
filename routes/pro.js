@@ -12,6 +12,7 @@ const Buttonss = require("../model/buttonschema");
 const Stylesc = require("../model/styleschema");
 
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const Details = require("../model/Details");
 const WORKSPACE_BUCKET = process.env.WORKSPACE_BUCKET;
 const s3 = new S3Client({
   region: process.env.BUCKET_REGION,
@@ -111,6 +112,7 @@ router.post("/proodata", async (req, res) => {
     });
   }
 });
+
 router.get("/getdata", async (req, res) => {
   const prodata = await Pro.findOne();
   try {
@@ -151,7 +153,6 @@ router.get("/getdata", async (req, res) => {
   }
 });
 
-
 router.get("/getproodata", async (req, res) => {
   try {
     const data = await Proo.find();
@@ -161,6 +162,7 @@ router.get("/getproodata", async (req, res) => {
     res.status(400).json({ message: e.message, success: false });
   }
 });
+
 router.post("/setstyles", async (req, res) => {
   try {
     const { buttoncolor, color, backgroundColor, color1, color2 } = req.body;
@@ -180,6 +182,7 @@ router.post("/setstyles", async (req, res) => {
     });
   }
 });
+
 router.post("/setbuttons", async (req, res) => {
   try {
     const {
@@ -226,6 +229,7 @@ router.post("/setbuttons", async (req, res) => {
     });
   }
 });
+
 router.post("/setfonts", async (req, res) => {
   try {
     const { link, name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign
@@ -245,6 +249,7 @@ router.post("/setfonts", async (req, res) => {
     });
   }
 });
+
 router.get("/getbuttons", async (req, res) => {
   try {
     const data = await Buttonss.find();
@@ -254,6 +259,7 @@ router.get("/getbuttons", async (req, res) => {
     res.status(400).json({ message: e.message, success: false });
   }
 });
+
 router.get("/getstyles", async (req, res) => {
   try {
     const data = await Stylesc.find();
@@ -263,6 +269,7 @@ router.get("/getstyles", async (req, res) => {
     res.status(400).json({ message: e.message, success: false });
   }
 });
+
 router.get("/getfonts", async (req, res) => {
   try {
     const data = await Fontsss.find();
@@ -272,4 +279,36 @@ router.get("/getfonts", async (req, res) => {
     res.status(400).json({ message: e.message, success: false });
   }
 });
+
+router.post("/v1/form", upload.single("doc"), async (req, res) => {
+  try {
+    const { name, email, phone, message, batch } = req.body
+    const uuidString = uuid();
+    const objectName = `${Date.now()}${uuidString}${req.file.originalname}`;
+
+    if (req.file) {
+      const result = await s3.send(
+        new PutObjectCommand({
+          Bucket: WORKSPACE_BUCKET,
+          Key: objectName,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+        })
+      );
+      const details = new Details({
+        name, email, phone, message, batch, doc: objectName
+      })
+      await details.save()
+    } else {
+      const details = new Details({
+        name, email, phone, message, batch, doc: objectName
+      })
+      await details.save()
+    }
+    res.status(200).json({ success: true, message: "Details Saved!" })
+  } catch (error) {
+    res.status(400).json({ success: false, message: "Something went wrong!" })
+  }
+})
+
 module.exports = router;
