@@ -282,7 +282,7 @@ router.get("/getfonts", async (req, res) => {
 
 router.post("/v1/form", upload.single("doc"), async (req, res) => {
   try {
-    const { name, email, phone, message, batch } = req.body
+    const { name, email, phone, message, batch, job } = req.body
     const uuidString = uuid();
     const objectName = `${Date.now()}${uuidString}${req.file.originalname}`;
 
@@ -296,7 +296,7 @@ router.post("/v1/form", upload.single("doc"), async (req, res) => {
         })
       );
       const details = new Details({
-        name, email, phone, message, batch, doc: objectName
+        name, email, phone, message, batch, doc: objectName, job
       })
       await details.save()
     } else {

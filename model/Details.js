@@ -6,6 +6,7 @@ const detailsSchema = mongoose.Schema({
 	phone: { type: Number },
 	message: { type: String },
 	doc: { type: String },
+	job: { type: String },
 	batch: { type: String }
 })
 
