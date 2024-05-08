@@ -183,7 +183,7 @@ router.post("/setstyles", async (req, res) => {
   }
 });
 
-router.post("/setbuttons", async (req, res) => {
+router.post("/setbuttons", upload.single("image"), async (req, res) => {
   try {
     const {
       padding,
@@ -201,15 +201,36 @@ router.post("/setbuttons", async (req, res) => {
       borderRadiusLeft,
       boxShadow,
       fontBold,
+      premium,
+      gradient,
+      imageAlign,
+      link, name, fontFamily
     } = req.body;
-    const Buttons = new Buttonss({
+    const image = req.file
+
+    const uuidString = uuid();
+    const objectName = `${Date.now()}${uuidString}${image.originalname}`;
+    const result = await s3.send(
+      new PutObjectCommand({
+        Bucket: WORKSPACE_BUCKET,
+        Key: objectName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      })
+    );
+
+    const buttons = new Buttonss({
       padding: padding,
       shadow: shadow,
       borderRadius: borderRadius,
       backgroundColor: backgroundColor,
       color: color,
+      imageAlign,
       borderTop: borderTop,
+      image: objectName,
       borderBottom: borderBottom,
+      gradient,
+      link, name, fontFamily,
       borderRight: borderRight,
       borderLeft: borderLeft,
       borderRadiusTop: borderRadiusTop,
@@ -218,10 +239,11 @@ router.post("/setbuttons", async (req, res) => {
       borderRadiusLeft: borderRadiusLeft,
       boxShadow: boxShadow,
       fontBold: fontBold,
+      premium: premium == "true" ? true : false
     });
-    await Buttons.save();
+    const newbutton = await buttons.save();
 
-    res.status(200).json({ success: true, Buttons });
+    res.status(200).json({ success: true, newbutton });
   } catch (e) {
     res.status(409).json({
       message: e.message,
@@ -232,16 +254,16 @@ router.post("/setbuttons", async (req, res) => {
 
 router.post("/setfonts", async (req, res) => {
   try {
-    const { link, name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign
+    const { link, name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, premium, textAlign
 
     } = req.body;
-    const Fonts = new Fontsss({ link: link, name: name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign });
+    const fonts = new Fontsss({ link: link, name: name, fontFamily, fontSize, fontWeight, fontStyle, textDecoration, lineHeight, letterSpacing, color, textAlign, premium: premium == "true" ? true : false });
     //console.log(user, id);
 
     //  await pross.updateOne({ _id: id });
-    await Fonts.save();
+    const newfonts = await fonts.save();
 
-    res.status(200).json({ success: true, Fonts });
+    res.status(200).json({ success: true, newfonts });
   } catch (e) {
     res.status(409).json({
       message: e.message,
