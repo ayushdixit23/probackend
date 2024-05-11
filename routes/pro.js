@@ -165,16 +165,17 @@ router.get("/getproodata", async (req, res) => {
 
 router.post("/setstyles", async (req, res) => {
   try {
-    const { buttoncolor, color, backgroundColor, color1, color2 } = req.body;
-    const Styles = new Stylesc({
+    const { buttoncolor, color, backgroundColor, color1, color2, premium } = req.body;
+    const style = new Stylesc({
       buttoncolor: buttoncolor,
       color: color,
       backgroundColor: backgroundColor,
-      color1, color2
+      color1, color2,
+      premium: premium == "true" ? true : false
     });
-    await Styles.save();
+    await style.save();
 
-    res.status(200).json({ success: true, Stylesc });
+    res.status(200).json({ success: true, style });
   } catch (e) {
     res.status(409).json({
       message: e.message,
