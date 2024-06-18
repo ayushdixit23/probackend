@@ -84,7 +84,7 @@ async function uploadImagesToS3AndMongoDB(directoryPath) {
       const objj = {
         name: arr,
         link: objectName,
-        premium: true
+        premium: false
       };
       img.push(objj);
       const contentType = mime.contentType(path.extname(filePath)) || 'application/octet-stream';
@@ -97,7 +97,9 @@ async function uploadImagesToS3AndMongoDB(directoryPath) {
           ContentType: contentType,// Adjust content type as per your files
         })
       );
+      console.log(objj)
     }
+
 
 
     const pro = await Pro.findById("65eb65c5498f5fe764d817b7")
@@ -105,10 +107,11 @@ async function uploadImagesToS3AndMongoDB(directoryPath) {
     const all = [...pro.bgimg, ...img]
 
     // pro.img = all
+
     pro.bgimg = all
     await pro.save()
 
-    // console.log(all)
+    console.log(all)
 
 
     console.log("All images uploaded to S3 and details saved to MongoDB");
@@ -118,8 +121,8 @@ async function uploadImagesToS3AndMongoDB(directoryPath) {
   }
 }
 
-const directoryPath = "C:\\Users\\fsayu\\OneDrive\\Desktop\\fileupload\\prosite\\more\\bg";
-// const directoryPath = "C:\Users\fsayu\OneDrive\Desktop\fileupload\prosite\more\bg";
+const directoryPath = "C:\\Users\\fsayu\\OneDrive\\Desktop\\prositeimages\\prositeimages\\homedecor&furnishing";
+// const directoryPath = "C:\Users\fsayu\OneDrive\Desktop\prositeimages\prositeimages\Bakery&CakeShop\free";
 
 // uploadImagesToS3AndMongoDB(directoryPath)
 
@@ -128,13 +131,13 @@ const shuffleImage = async () => {
   try {
     const pro = await Pro.findById("65eb65c5498f5fe764d817b7")
 
-    let indexes = Array.from({ length: pro.bgimg.length }, (_, i) => i);
+    let indexes = Array.from({ length: pro.img.length }, (_, i) => i);
 
     // Shuffle the indexes array
     shuffle(indexes);
 
     // Your array of 120 objects
-    let arrayOfObjects = pro.bgimg
+    let arrayOfObjects = pro.img
 
     // Create a new array to store shuffled objects
     let shuffledArray = [];
@@ -146,9 +149,11 @@ const shuffleImage = async () => {
 
     console.log(shuffledArray);
 
-    pro.bgimg = shuffledArray
-
+    // pro.bgimg = shuffledArray
+    pro.img = shuffledArray
     await pro.save()
+
+    console.log("Shuffled", pro.img.length)
 
   } catch (error) {
     console.log(error)

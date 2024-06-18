@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const Fontsss = new mongoose.Schema({
   link: String,
   name: String,
@@ -14,4 +15,4 @@ const Fontsss = new mongoose.Schema({
   premium: { type: Boolean, default: false }
 });
 
-module.exports = mongoose.model("Fontsss", Fontsss);
+module.exports = mongoose.model("Font", Fontsss);
