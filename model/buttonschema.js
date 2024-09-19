@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const Buttonss = new mongoose.Schema({
   link: String,
   name: String,
@@ -6,7 +7,6 @@ const Buttonss = new mongoose.Schema({
   padding: { type: String },
   shadow: { type: String },
   gradient: { type: String },
-  // linear-gradient(to right, #ff7e5f, #feb47b)
   imageAlign: { type: String, enum: ["left", "right"], default: "left" },
   borderRadius: { type: String },
   backgroundColor: { type: String },

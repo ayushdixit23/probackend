@@ -1,18 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const uuid = require("uuid").v4;
-const multer = require("multer");
 require("dotenv").config();
+const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const Pro = require("../model/prosite");
 const Proo = require("../model/proosite");
 const Fontsss = require("../model/fontschems");
 const Buttonss = require("../model/buttonschema");
-const Stylesc = require("../model/styleschema");
-
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const Details = require("../model/Details");
+const Stylesc = require("../model/styleschema");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const WORKSPACE_BUCKET = process.env.WORKSPACE_BUCKET;
 const s3 = new S3Client({
   region: process.env.BUCKET_REGION,

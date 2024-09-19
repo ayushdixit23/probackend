@@ -13,3 +13,4 @@ const Styles = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Styles", Styles);
+

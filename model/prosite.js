@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
-// const { ObjectId } = mongoose.Schema;
 const Prositeschema = new mongoose.Schema({
-  //id: ObjectId,
-  // bgimg: [{ type: String }],
-  // img: [{ type: String }
   bgimg: [
     {
       link: { type: String },
@@ -18,7 +14,6 @@ const Prositeschema = new mongoose.Schema({
       name: [{ type: String }]
     }
   ],
-
 });
 
 module.exports = mongoose.model("Pro", Prositeschema);
